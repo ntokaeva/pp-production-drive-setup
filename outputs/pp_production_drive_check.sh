@@ -26,6 +26,9 @@ exists_line() {
 add_target_candidate() {
   local label="$1"
   local path="$2"
+  if [[ "$path" == *"ручная папка"* || "$path" == *"не использовать"* ]]; then
+    return
+  fi
   if (( ${TARGET_CANDIDATES[(Ie)$path]} == 0 )); then
     TARGET_CANDIDATES+=("$path")
     printf "%-4s %s\n" "$label" "$path"
@@ -87,8 +90,6 @@ TARGET_CANDIDATES=()
 for prod in "${PRODUCTION_ROOTS[@]}"; do
   RG2_EXACT=(
     "$prod/RG2 Vault/70_Activities/70.1_Engagements/70.1.2_RG2"
-    "$prod/РГ2"
-    "$prod/RG2"
   )
   for path in "${RG2_EXACT[@]}"; do
     if [[ -d "$path" ]]; then
@@ -99,12 +100,14 @@ for prod in "${PRODUCTION_ROOTS[@]}"; do
   # Fallback for machines where the folder was synced under a localized or older name.
   while IFS= read -r path; do
     [[ "$path" == *"archive"* || "$path" == *"Archive"* ]] && continue
+    [[ "$path" == *"ручная папка"* || "$path" == *"не использовать"* ]] && continue
     [[ "$path" == *"Standards"* || "$path" == *"Templates"* ]] && continue
     add_target_candidate "RG2" "$path"
   done < <(/usr/bin/find "$prod" -maxdepth 8 -type d \( -iname "70.1.2*RG2*" -o -iname "70.1.2*РГ2*" \) 2>/dev/null | /usr/bin/sort)
 
   while IFS= read -r path; do
     [[ "$path" == *"archive"* || "$path" == *"Archive"* ]] && continue
+    [[ "$path" == *"ручная папка"* || "$path" == *"не использовать"* ]] && continue
     if [[ "$path" != *"РГ1"* && "$path" != *"RG1"* && "$path" != *"70.1.1"* ]]; then
       continue
     fi
